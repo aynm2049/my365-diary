@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MY 365 DIARY</title>
+<meta name="description" content="毎日のいちばんの1枚を、撮った日のマスに切り抜いて貼っていく写真日記。">
+<meta name="theme-color" content="#e2e3d8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="365 DIARY">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Montserrat:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="vendor/exifr-lite.umd.js" defer></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="topbar">
+    <h1 class="brand"><span class="logo" aria-label="MY 365 DIARY"><span>MY</span><span class="num365">365</span><span>DIARY</span></span></h1>
+    <p class="intro">MY 365 DIARYは、毎日のいちばんの1枚を残す写真日記です。写真を選ぶだけで、撮った日のマスに切り抜いて貼られます。何気ない風景が1ヶ月の記録になります。</p>
+  </header>
+
+  <div class="addrow">
+    <button type="button" class="btn primary" id="addBtn">＋ 写真をまとめて追加</button>
+    <input type="file" id="files" accept="image/*" multiple hidden>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </div>
+
+  <section class="sheet" aria-label="カレンダー">
+    <div class="head">
+      <div class="year" id="yearNum"></div>
+      <div class="month" id="monthName"></div>
+      <div class="mnum" id="monthNum" aria-hidden="true"></div>
+    </div>
+    <div class="dow" aria-hidden="true"><div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <nav class="nav" aria-label="月の切り替え">
+    <button class="btn round" id="prev" aria-label="前の月">‹</button>
+    <span class="nav-label" aria-live="polite"><span id="navMonth"></span> <span class="nav-year" id="navYear"></span></span>
+    <button class="btn round" id="next" aria-label="次の月">›</button>
+  </nav>
+
+  <div class="saverow">
+    <button type="button" class="btn outline" id="saveImg">画像として保存</button>
+  </div>
+
+  <p class="privacy">写真はこの端末のブラウザの中だけに保存され、どこにも送信されません。</p>
+</main>
+
+<div class="snackbar" id="snackbar" role="status" aria-live="polite"></div>
+
+<div class="overlay" id="imgPreview" hidden>
+  <div class="panel preview" role="dialog" aria-modal="true" aria-labelledby="pvTitle">
+    <div class="p-head"><h2 id="pvTitle">画像のプレビュー</h2><button class="p-close" aria-label="閉じる">×</button></div>
+    <p class="pv-note">画像を長押し（パソコンでは右クリック）して保存してください。</p>
+    <img alt="カレンダーの画像" class="pv-img">
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <div class="p-head">
+      <h2 id="pTitle"><span id="pDate"></span></h2>
+      <button class="p-close" id="pClose" aria-label="閉じる">×</button>
+    </div>
+    <div>
+      <div class="label">この日の写真</div>
+      <div class="cands" id="pCands"></div>
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="pRemove">写真を外す</button>
+    </div>
+    <div class="confirm" id="pConfirm" hidden>
+      <p>この写真をカレンダーから外しますか？スマホのカメラロールにある元の写真は消えません。</p>
+      <div class="row">
+        <button class="btn dark" id="pRemoveYes">外す</button>
+        <button class="btn ghost" id="pRemoveNo">やめる</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
