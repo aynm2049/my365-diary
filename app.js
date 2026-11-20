@@ -58,7 +58,7 @@ function render() {
   $("monthName").textContent = MONTHS[m];
   $("yearNum").textContent = y;
   $("monthNum").textContent = m + 1;
-  $("navMonth").textContent = MONTHS[m];
+  $("navMonth").textContent = `${m + 1}月`;
   $("navYear").textContent = y;
   const first = new Date(y, m, 1), total = new Date(y, m + 1, 0).getDate();
   grid.innerHTML = "";
