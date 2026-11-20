@@ -83,6 +83,16 @@ img{max-width:100%}
 .grid{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);border-top:.5px solid var(--ink);border-left:.5px solid var(--ink)}
 .cell{position:relative;min-width:0;min-height:0;border-right:.5px solid var(--ink);border-bottom:.5px solid var(--ink);-webkit-tap-highlight-color:transparent}
 .cell.blank{background:rgba(0,0,0,.025)}
+/* Hi-DPI screens (phones): iOS Safari can drop .5px borders on fractional row heights,
+   so draw the hairlines with a 1px border scaled to half instead. */
+@media (min-resolution:2dppx){
+  .grid{border:0}
+  .cell{border:0}
+  .cell::before{content:"";position:absolute;top:0;left:0;width:200%;height:200%;pointer-events:none;
+    border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);transform:scale(.5);transform-origin:0 0}
+  .grid>.cell:nth-child(-n+7)::before{border-top:1px solid var(--ink)}
+  .grid>.cell:nth-child(7n+1)::before{border-left:1px solid var(--ink)}
+}
 .cell[role="button"]{cursor:pointer;transition:background-color .2s ease}
 .cell[role="button"]:hover{background:rgba(35,35,34,.04)}
 .cell:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
