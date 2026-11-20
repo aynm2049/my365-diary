@@ -88,7 +88,7 @@ function render() {
       if (data.photos.length > 1) {
         const s = document.createElement("span"); s.className = "many"; s.textContent = "+" + (data.photos.length - 1); cell.appendChild(s);
       }
-    } else if (!future) {
+    } else {
       const mr = rng(hash(k + "-note"));
       if (mr() < .5) {
         const t = document.createElement("span"); t.className = "love";
