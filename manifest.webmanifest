@@ -1,7 +1,7 @@
 {
   "name": "MY 365 DIARY",
   "short_name": "365 DIARY",
-  "description": "毎日のいちばんの1枚を、撮った日のマスに切り抜いて貼っていく写真日記。",
+  "description": "日々の1枚を、撮った日のマスに切り抜いて貼っていく写真日記。",
   "lang": "ja",
   "start_url": "./",
   "scope": "./",
