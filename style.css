@@ -171,19 +171,3 @@ img{max-width:100%}
   .cut,.btn,.cell[role="button"],.snackbar{transition:none}
   .cell:hover .cut,.btn:active{transform:none}
 }
-
-/* PC: two columns — title, intro and add button on the left, calendar on the right */
-@media (min-width:960px){
-  body{padding-top:48px;padding-left:32px;padding-right:32px}
-  .wrap{max-width:1180px;display:grid;column-gap:56px;row-gap:20px;align-items:start;
-    grid-template-columns:minmax(260px,340px) minmax(0,1fr);
-    grid-template-rows:auto auto auto 1fr auto auto}
-  .topbar{grid-column:1;grid-row:1;align-items:flex-start;text-align:left;padding-top:8px}
-  .addrow{grid-column:1;grid-row:2;align-items:stretch;text-align:left}
-  .addrow .btn.primary{max-width:none}
-  .privacy{grid-column:1;grid-row:3;text-align:left;margin:0}
-  .sheet{grid-column:2;grid-row:1 / span 4;justify-self:center;
-    width:clamp(560px,calc((100svh - 150px) * .7071),820px);max-width:100%}
-  .nav{grid-column:2;grid-row:5;margin-top:0}
-  .saverow{grid-column:2;grid-row:6;margin-top:0}
-}
