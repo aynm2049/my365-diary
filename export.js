@@ -49,9 +49,8 @@ async function renderSheet(sheet) {
   ctx.save(); ctx.globalAlpha = .05; ctx.globalCompositeOperation = "multiply";
   ctx.fillStyle = ctx.createPattern(noise(256, 255), "repeat"); ctx.fillRect(0, 0, OUT_W, OUT_H); ctx.restore();
 
-  // header + weekday row
+  // header
   ["yearNum", "monthName", "monthNum"].forEach(id => text(document.getElementById(id), ink));
-  sheet.querySelectorAll(".dow div").forEach(d => text(d, ink));
 
   // grid
   const cells = [...sheet.querySelectorAll(".grid .cell")];
