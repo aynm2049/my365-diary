@@ -2,6 +2,7 @@ import { store, askPersistentStorage } from "./db.js";
 import { prepareCutout, makeSticker } from "./cutout.js";
 import { setupExport } from "./export.js";
 
+const MAX_FILES = 10; // photos per add (cut-outs run one by one on the phone)
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SPARKLE = "M50 6C54 34 66 46 94 50C66 54 54 66 50 94C46 66 34 54 6 50C34 46 46 34 50 6Z";
 const STAR8 = "M50.0 4.0 L54.2 39.8 L74.0 26.0 L60.2 45.8 L96.0 50.0 L60.2 54.2 L74.0 74.0 L54.2 60.2 L50.0 96.0 L45.8 60.2 L26.0 74.0 L39.8 54.2 L4.0 50.0 L39.8 45.8 L26.0 26.0 L45.8 39.8Z";
@@ -185,7 +186,9 @@ async function takenDate(file) {
 let busy = false;
 $("addBtn").addEventListener("click", () => { if (!busy) $("files").click(); });
 $("files").addEventListener("change", async e => {
-  const files = [...e.target.files]; e.target.value = "";
+  const picked10 = [...e.target.files]; e.target.value = "";
+  const skipped = Math.max(0, picked10.length - MAX_FILES);
+  const files = picked10.slice(0, MAX_FILES);
   if (!files.length || busy) return;
   busy = true; const btn = $("addBtn"); btn.disabled = true;
   askPersistentStorage();
@@ -213,6 +216,7 @@ $("files").addEventListener("change", async e => {
   if (latest) view = { y: latest.getFullYear(), m: latest.getMonth() };
   render();
   const notes = [];
+  if (skipped) notes.push(`一度に追加できるのは${MAX_FILES}枚までです。残りの${skipped}枚は、もう一度「写真をまとめて追加」から選んでください。`);
   if (noDate) notes.push(`${noDate}枚は撮影日が読み取れなかったので、ファイルの日付で置いています。`);
   if (failed) notes.push(`${failed}枚は読み込めませんでした（HEIC形式などは、このブラウザでは開けないことがあります）。`);
   if (!modelOk && ok) notes.push("切り抜き用のデータを読み込めなかったため、丸く切り抜いて貼りました。");
