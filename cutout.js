@@ -15,14 +15,14 @@ function lib() {
   return libPromise;
 }
 function config(progress) {
-  const c = { model: "isnet_quint8", output: { format: "image/png" } };
+  const c = { model: window.MY365_MODEL || "isnet_fp16", output: { format: "image/png" } };
   if (window.MY365_MODEL_PATH) c.publicPath = window.MY365_MODEL_PATH; // for local testing only
   if (progress) c.progress = progress;
   return c;
 }
 
 let ready = false;
-/** Downloads the cut-out model once (about 45MB). Reports progress 0..1. */
+/** Downloads the cut-out model once (about 90MB). Reports progress 0..1. */
 export async function prepareCutout(onProgress) {
   if (ready) return;
   const l = await lib();
@@ -53,13 +53,26 @@ function scaled(bitmap, max) {
   return c;
 }
 
-// Keep only the biggest connected blob of the mask, fill small holes, sharpen the edge.
-function cleanMask(alpha, w, h) {
-  const on = new Uint8Array(w * h);
-  for (let i = 0; i < w * h; i++) on[i] = alpha[i] > 110 ? 1 : 0;
-  const label = new Int32Array(w * h).fill(0);
+// Integral image helpers for fast box erosion / dilation.
+function boxCount(src, w, h, r) {
+  const I = new Int32Array((w + 1) * (h + 1));
+  for (let y = 0; y < h; y++) { let row = 0; for (let x = 0; x < w; x++) { row += src[y * w + x]; I[(y + 1) * (w + 1) + x + 1] = I[y * (w + 1) + x + 1] + row; } }
+  const out = new Int32Array(w * h);
+  for (let y = 0; y < h; y++) { const y0 = Math.max(0, y - r), y1 = Math.min(h, y + r + 1);
+    for (let x = 0; x < w; x++) { const x0 = Math.max(0, x - r), x1 = Math.min(w, x + r + 1);
+      out[y * w + x] = I[y1 * (w + 1) + x1] - I[y0 * (w + 1) + x1] - I[y1 * (w + 1) + x0] + I[y0 * (w + 1) + x0]; } }
+  return out;
+}
+function erode(m, w, h, r) { const c = boxCount(m, w, h, r), o = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) { const ny = Math.min(h, y + r + 1) - Math.max(0, y - r);
+    for (let x = 0; x < w; x++) { const nx = Math.min(w, x + r + 1) - Math.max(0, x - r); o[y * w + x] = c[y * w + x] === nx * ny ? 1 : 0; } }
+  return o; }
+function dilate(m, w, h, r) { const c = boxCount(m, w, h, r), o = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) o[i] = c[i] > 0 ? 1 : 0; return o; }
+
+function largest(on, w, h) {
+  const label = new Int32Array(w * h); const stack = new Int32Array(w * h);
   let best = 0, bestSize = 0, cur = 0;
-  const stack = new Int32Array(w * h);
   for (let i = 0; i < w * h; i++) {
     if (!on[i] || label[i]) continue;
     cur++; let sp = 0, size = 0; stack[sp++] = i; label[i] = cur;
@@ -78,6 +91,21 @@ function cleanMask(alpha, w, h) {
   return { keep, size: bestSize };
 }
 
+// Keep only the main subject: drop thin strands (sheet wrinkles, cables) with a
+// morphological opening, then keep the biggest connected blob.
+function cleanMask(alpha, w, h) {
+  const on = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) on[i] = alpha[i] > 110 ? 1 : 0;
+  const r = Math.max(2, Math.round(Math.min(w, h) * 0.006));
+  const opened = dilate(erode(on, w, h, r), w, h, r);
+  const { keep } = largest(opened, w, h);
+  // restore the subject's real outline, but only next to the kept blob
+  const near = dilate(keep, w, h, 1);
+  let size = 0;
+  for (let i = 0; i < w * h; i++) { keep[i] = on[i] && near[i] ? 1 : 0; size += keep[i]; }
+  return { keep, size };
+}
+
 function bbox(keep, w, h) {
   let x0 = w, y0 = h, x1 = -1, y1 = -1;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (keep[y * w + x]) {
@@ -86,11 +114,14 @@ function bbox(keep, w, h) {
   return x1 < 0 ? null : { x0, y0, x1, y1 };
 }
 
+// True when the subject reaches (or nearly reaches) a side of the photo,
+// i.e. part of it is probably cut off. Checks a thin band along each side.
 function touchesEdge(keep, w, h) {
+  const band = Math.max(2, Math.round(Math.min(w, h) * 0.015));
   let top = 0, bottom = 0, left = 0, right = 0;
-  for (let x = 0; x < w; x++) { top += keep[x]; bottom += keep[(h - 1) * w + x]; }
-  for (let y = 0; y < h; y++) { left += keep[y * w]; right += keep[y * w + w - 1]; }
-  return Math.max(top / w, bottom / w, left / h, right / h) > 0.03;
+  for (let y = 0; y < band; y++) for (let x = 0; x < w; x++) { top += keep[y * w + x]; bottom += keep[(h - 1 - y) * w + x]; }
+  for (let y = 0; y < h; y++) for (let x = 0; x < band; x++) { left += keep[y * w + x]; right += keep[y * w + w - 1 - x]; }
+  return Math.max(top / (w * band), bottom / (w * band), left / (h * band), right / (h * band)) > 0.02;
 }
 
 async function roundCrop(source, box) {
@@ -126,7 +157,7 @@ export async function makeSticker(file) {
     for (let i = 0; i < w * h; i++) alpha[i] = id.data[i * 4 + 3];
     const { keep, size } = cleanMask(alpha, w, h);
     const box = bbox(keep, w, h);
-    if (!box || size < w * h * 0.01) return roundCrop(src, null);   // nothing clear to cut out
+    if (!box || size < w * h * 0.03) return roundCrop(src, null);   // nothing clear to cut out
     if (touchesEdge(keep, w, h)) return roundCrop(src, box);         // subject runs off the photo
 
     // Build the cut-out: original pixels + cleaned, slightly softened alpha
