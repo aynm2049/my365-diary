@@ -32,6 +32,15 @@ let view = { y: today.getFullYear(), m: today.getMonth() };
 const $ = id => document.getElementById(id);
 const grid = $("grid");
 const statusEl = $("status");
+/** Circular progress: p = 0..1, "spin" for unknown progress, null to hide. */
+function setRing(p) {
+  const ring = $("ring");
+  if (p === null) { ring.hidden = true; return; }
+  ring.hidden = false;
+  ring.classList.toggle("spin", p === "spin");
+  $("ringFg").style.strokeDashoffset = p === "spin" ? "" : String(100 - Math.round(p * 100));
+  $("ringPct").textContent = p === "spin" ? "" : `${Math.round(p * 100)}%`;
+}
 
 /* ---------- snackbar ---------- */
 let snackTimer = null;
@@ -182,10 +191,12 @@ $("files").addEventListener("change", async e => {
   askPersistentStorage();
   let modelOk = true;
   try {
-    await prepareCutout(p => { statusEl.textContent = `切り抜き用のデータを読み込んでいます（初回のみ） ${Math.round(p * 100)}%`; });
+    setRing("spin");
+    await prepareCutout(p => { setRing(p); statusEl.textContent = "切り抜き用のデータを読み込んでいます（初回のみ）"; });
   } catch (err) { console.warn(err); modelOk = false; }
   let ok = 0, noDate = 0, failed = 0, latest = null;
   for (let i = 0; i < files.length; i++) {
+    setRing(i / files.length);
     statusEl.textContent = `写真を切り抜いています… ${i + 1} / ${files.length}`;
     try {
       const { date, fromExif } = await takenDate(files[i]);
@@ -205,6 +216,7 @@ $("files").addEventListener("change", async e => {
   if (noDate) notes.push(`${noDate}枚は撮影日が読み取れなかったので、ファイルの日付で置いています。`);
   if (failed) notes.push(`${failed}枚は読み込めませんでした（HEIC形式などは、このブラウザでは開けないことがあります）。`);
   if (!modelOk && ok) notes.push("切り抜き用のデータを読み込めなかったため、丸く切り抜いて貼りました。");
+  setRing(null);
   statusEl.textContent = notes.join(" ");
   if (ok) snack(`${ok}枚を撮影日のマスに貼りました`);
   else if (failed) snack("写真を読み込めませんでした");

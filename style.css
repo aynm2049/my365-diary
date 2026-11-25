@@ -62,8 +62,18 @@ img{max-width:100%}
 .addrow .btn.primary{width:100%;max-width:480px;border-radius:999px;padding:14px 20px}
 .status{color:var(--on-cloth);font-size:13px;line-height:1.6}
 .status:empty{display:none}
-.saverow{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px}
-.saverow .btn{width:100%;max-width:480px;padding:14px 20px}
+.addrow .btn{width:100%;max-width:480px;padding:14px 20px}
+/* progress ring while photos are being added */
+.ring{position:relative;width:44px;height:44px;margin-top:6px;color:var(--ink)}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:3}
+.ring-bg{stroke:rgba(var(--shadow),.18)}
+.ring-fg{stroke:currentColor;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .3s ease}
+.ring-pct{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-sans);font-weight:500;font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ring.spin svg{animation:ring-spin 1s linear infinite}
+.ring.spin .ring-fg{stroke-dashoffset:75}
+@keyframes ring-spin{to{transform:rotate(270deg)}}
+@media (prefers-reduced-motion:reduce){.ring.spin svg{animation-duration:3s}}
 .privacy{margin:4px 0 0;text-align:center;font-size:12px;color:var(--on-cloth);opacity:.8}
 
 /* calendar sheet: A3 portrait (297 x 420 mm) */
