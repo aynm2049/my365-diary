@@ -63,6 +63,7 @@ img{max-width:100%}
 .status{color:var(--on-cloth);font-size:13px;line-height:1.6}
 .status:empty{display:none}
 .saverow{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px}
+.saverow .btn{width:100%;max-width:480px;padding:14px 20px}
 .privacy{margin:4px 0 0;text-align:center;font-size:12px;color:var(--on-cloth);opacity:.8}
 
 /* calendar sheet: A3 portrait (297 x 420 mm) */
@@ -115,7 +116,9 @@ img{max-width:100%}
 .cut.circle img{object-fit:cover;clip-path:circle(50% at 50% 50%)}
 .cut.circle::after{-webkit-mask-size:cover;mask-size:cover;clip-path:circle(50% at 50% 50%)}
 .cell:hover .cut{transform:scale(1.06) rotate(var(--r,0deg))}
-.many{position:absolute;z-index:7;bottom:3px;right:4px;font-family:var(--f-label);font-weight:700;font-variant-numeric:tabular-nums;font-size:10px;background:var(--ink);color:var(--paper);border-radius:999px;padding:0 5px;pointer-events:none}
+.swap{position:absolute;z-index:7;bottom:3px;right:3px;width:20px;height:20px;padding:0;border:0;border-radius:50%;
+  background:var(--ink);color:var(--paper);display:grid;place-items:center;pointer-events:none}
+.swap svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .cstars{position:absolute;left:8%;right:8%;top:50%;aspect-ratio:1;margin-top:-34%;z-index:4;pointer-events:none}
 .cstars span{position:absolute;width:22%;aspect-ratio:1}
 .cstars svg{width:100%;height:100%;display:block;fill:var(--ink)}

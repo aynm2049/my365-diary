@@ -5,6 +5,7 @@ import { setupExport } from "./export.js";
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SPARKLE = "M50 6C54 34 66 46 94 50C66 54 54 66 50 94C46 66 34 54 6 50C34 46 46 34 50 6Z";
 const STAR8 = "M50.0 4.0 L54.2 39.8 L74.0 26.0 L60.2 45.8 L96.0 50.0 L60.2 54.2 L74.0 74.0 L54.2 60.2 L50.0 96.0 L45.8 60.2 L26.0 74.0 L39.8 54.2 L4.0 50.0 L39.8 45.8 L26.0 26.0 L45.8 39.8Z";
+const SWAP_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l4 4-4 4M4 11V9.5A2.5 2.5 0 0 1 6.5 7H20M8 21l-4-4 4-4M20 13v1.5a2.5 2.5 0 0 1-2.5 2.5H4"/></svg>`;
 const svgOf = d => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${d}"/></svg>`;
 
 const LOVE_NOTES = [
@@ -82,11 +83,14 @@ function render() {
       if (p.kind === "circle") {
         const cs = document.createElement("div"); cs.className = "cstars"; cs.setAttribute("aria-hidden", "true");
         const cr = rng(hash(k + "-cstar"));
-        const shape = cr() < .5 ? SPARKLE : STAR8, pos = cr() < .5 ? "tl" : "br";
+        const shape = cr() < .5 ? SPARKLE : STAR8, pos = cr() < .5 || data.photos.length > 1 ? "tl" : "br"; // keep clear of the switch icon
         cs.innerHTML = `<span class="${pos}">${svgOf(shape)}</span>`; cell.appendChild(cs);
       }
       if (data.photos.length > 1) {
-        const s = document.createElement("span"); s.className = "many"; s.textContent = "+" + (data.photos.length - 1); cell.appendChild(s);
+        // switch icon: shows this day has more photos; tapping the cell opens the picker
+        const sw = document.createElement("span"); sw.className = "swap"; sw.setAttribute("aria-hidden", "true");
+        sw.innerHTML = SWAP_ICON;
+        cell.appendChild(sw);
       }
     } else {
       const mr = rng(hash(k + "-note"));
@@ -105,7 +109,7 @@ function render() {
     }
     if (!future) {
       cell.tabIndex = 0; cell.setAttribute("role", "button"); cell.dataset.k = k;
-      cell.setAttribute("aria-label", `${m + 1}月${d}日を開く`);
+      cell.setAttribute("aria-label", `${m + 1}月${d}日を開く` + (data && data.photos.length > 1 ? `（写真${data.photos.length}枚から選べます）` : ""));
       cell.addEventListener("click", () => openDay(date));
       cell.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openDay(date); } });
     }
