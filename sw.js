@@ -1,5 +1,5 @@
 // Offline support: keeps the app files on the device so it opens without a connection.
-const VERSION = "my365-v10";
+const VERSION = "my365-v11";
 const SHELL = [
   "./", "index.html", "style.css", "app.js", "db.js", "cutout.js", "export.js",
   "vendor/background-removal.js", "vendor/exifr-lite.umd.js",

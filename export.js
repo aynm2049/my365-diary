@@ -118,7 +118,7 @@ export function setupExport({ snack }) {
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !prev.hidden) close.click(); });
 
   btn.addEventListener("click", async () => {
-    btn.disabled = true; const label = btn.textContent; btn.textContent = "画像を作っています…";
+    const lbl = btn.querySelector(".lbl"); btn.disabled = true; const label = lbl.textContent; lbl.textContent = "画像を作っています…";
     try {
       const blob = await renderSheet(document.querySelector(".sheet"));
       const name = `MY365-${document.getElementById("yearNum").textContent}-${document.getElementById("monthName").textContent}.png`;
@@ -134,7 +134,7 @@ export function setupExport({ snack }) {
       } else showPreview(blob);
     } catch (e) {
       console.error(e); snack("画像を作れませんでした。もう一度お試しください");
-    } finally { btn.disabled = false; btn.textContent = label; }
+    } finally { btn.disabled = false; lbl.textContent = label; }
   });
 
   function showPreview(blob) {
